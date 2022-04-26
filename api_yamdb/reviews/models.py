@@ -1,16 +1,17 @@
 from django.contrib.auth.models import AbstractUser
-from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
 
 class User(AbstractUser):
     bio = models.TextField(
-        'Биография',
+        "Биография",
         blank=True,
     )
-    role = models.TextField(
-        'Роль',
-        default='user'
+    role = models.CharField(
+        max_length=50,
+        verbose_name="Роль",
+        default="user"
     )
 
 
@@ -81,52 +82,50 @@ class genre_title(models.Model):
         return f'{self.genre} {self.title}'
 
 
-
 class Review(models.Model):
     title_id = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
-        related_name='reviews',
+        related_name="reviews",
     )
-    text = models.TextField('Текст', help_text='Отзыв')
+    text = models.TextField("Текст", help_text="Отзыв")
     author = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
-        related_name='reviews',
-        verbose_name='Автор'
+        related_name="reviews",
+        verbose_name="Автор",
     )
     score = models.SmallIntegerField(
-        verbose_name='Оценка',
+        verbose_name="Оценка",
         validators=[MinValueValidator(1), MaxValueValidator(10)],
         # default=0
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     def __str__(self):
         return self.text[:15]
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ["-pub_date"]
         constraints = [
             models.UniqueConstraint(
-                fields=['title_id', 'author'],
-                name='unique_review'
+                fields=["title_id", "author"], name="unique_review"
             )
         ]
 
 
 class Comment(models.Model):
     review_id = models.ForeignKey(
-        Review, on_delete=models.CASCADE, related_name='comments'
+        Review, on_delete=models.CASCADE, related_name="comments"
     )
-    text = models.TextField('Текст', help_text='Комментарий')
+    text = models.TextField("Текст", help_text="Комментарий")
     author = models.ForeignKey(
-        User, on_delete=models.CASCADE, related_name='comments'
+        User, on_delete=models.CASCADE, related_name="comments"
     )
-    pub_date = models.DateTimeField('Дата публикации', auto_now_add=True)
+    pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
     def __str__(self):
         return self.text
 
     class Meta:
-        ordering = ['-pub_date']
+        ordering = ["-pub_date"]
