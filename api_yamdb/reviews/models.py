@@ -51,18 +51,9 @@ class Title(models.Model):
     description = models.TextField(verbose_name="Описание произведения")
     genre = models.ManyToManyField(
         Genre,
-        through='genre_title',
-<<<<<<< HEAD
-
+        through='GenreTitle',
         related_name="titles",
         blank=True,
-
-=======
-        # on_delete=models.SET_NULL,
-        related_name="titles",
-        blank=True,
-        # null=True,
->>>>>>> master
         verbose_name="Жанр произведения",
     )
     category = models.ForeignKey(
@@ -81,7 +72,7 @@ class Title(models.Model):
         return self.name
 
 
-class genre_title(models.Model):
+class GenreTitle(models.Model):
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
@@ -90,7 +81,7 @@ class genre_title(models.Model):
 
 
 class Review(models.Model):
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name="reviews",
@@ -116,13 +107,13 @@ class Review(models.Model):
         ordering = ["-pub_date"]
         constraints = [
             models.UniqueConstraint(
-                fields=["title_id", "author"], name="unique_review"
+                fields=["title", "author"], name="unique_review"
             )
         ]
 
 
 class Comment(models.Model):
-    review_id = models.ForeignKey(
+    review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name="comments"
     )
     text = models.TextField("Текст", help_text="Комментарий")
