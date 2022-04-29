@@ -17,11 +17,11 @@ class User(AbstractUser):
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=200,
+        max_length=256,
         verbose_name="Категория",
         help_text="Проверьте название категории",
     )
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -29,11 +29,11 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=200,
+        max_length=256,
         verbose_name="Жанр",
         help_text="Проверьте название жанра",
     )
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
