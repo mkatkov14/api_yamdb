@@ -60,3 +60,12 @@ class TitleViewSet(viewsets.ModelViewSet):
     # permission_classes = 
     queryset = Title.objects.all()
     serializer_class = TitleSerializer
+    filter_backends = (DjangoFilterBackend)
+    filterset_fields=('genre__slug', 'category__slug', 'name', 'year', )
+
+    def get_queryset(self):
+        queryset = Title.objects.all()
+        slug = self.request.query_params.get('slug')
+        if slug is not None:
+            queryset = queryset.filter(slug=slug)
+        return queryset

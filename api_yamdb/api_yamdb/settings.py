@@ -19,6 +19,7 @@ INSTALLED_APPS = [
     'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
     'django_filters',
+    'api_yamdb',
 ]
 
 MIDDLEWARE = [
