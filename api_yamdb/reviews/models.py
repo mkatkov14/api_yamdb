@@ -2,17 +2,36 @@ from django.contrib.auth.models import AbstractUser
 from django.core.validators import MaxValueValidator, MinValueValidator
 from django.db import models
 
+USER_ROLES = (
+    ('MODERATOR', 'Модератор'),
+    ('ADMINISTRATOR', 'Администратор'),
+    ('USER', 'Авторизованный пользователь'),
+)
+
 
 class User(AbstractUser):
+
     bio = models.TextField(
         "Биография",
         blank=True,
+        null=True
     )
     role = models.CharField(
+        "Роль пользователя",
         max_length=50,
-        verbose_name="Роль",
-        default="user"
+        choices=USER_ROLES,
+        default='USER',
+
     )
+
+    def __str__(self):
+        return self.username
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'], name='unique_user')
+        ]
 
 
 class Category(models.Model):
