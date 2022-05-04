@@ -8,8 +8,45 @@ from reviews.models import Review, Comment, User
 class UserSerializer(serializers.ModelSerializer):
 
     class Meta:
-        fields = '__all__'
+        fields = ('username', 'email', 'first_name',
+                  'last_name', 'bio', 'role')
         model = User
+
+    def validate(self, data):
+        '''Валидируем, что пользователь не будет использовать
+           никнейм, конфликтующий с эндпоинтом.
+        '''
+        if data.get('username') != 'me':
+            return data
+        raise serializers.ValidationError(
+            'Невозможное имя пользователя'
+        )
+
+
+class RegistrationSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = User
+        fields = ('email', 'username')
+
+    def validate(self, data):
+        '''Валидируем, что пользователь не будет использовать
+           никнейм, конфликтующий с эндпоинтом.
+        '''
+        if data.get('username') != 'me':
+            return data
+        raise serializers.ValidationError(
+            'Невозможное имя пользователя'
+        )
+
+
+class ObtainTokenSerializer(serializers.ModelSerializer):
+    username = serializers.CharField(max_length=50)
+    confirmation_code = serializers.CharField(max_length=15)
+
+    class Meta:
+        model = User
+        fields = ('username', 'confirmation_code')
 
 
 class ReviewSerializer(serializers.ModelSerializer):
