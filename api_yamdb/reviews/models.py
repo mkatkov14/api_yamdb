@@ -4,24 +4,63 @@ from django.db import models
 
 
 class User(AbstractUser):
+    USER = 'user'
+    MODER = 'moderator'
+    ADMIN = 'admin'
+
+    USER_ROLES = (
+        (MODER, 'Модератор'),
+        (ADMIN, 'Администратор'),
+        (USER, 'Пользователь'),
+    )
+
     bio = models.TextField(
-        "Биография",
+        'Биография',
         blank=True,
+        null=True
     )
     role = models.CharField(
+        'Роль пользователя',
         max_length=50,
-        verbose_name="Роль",
-        default="user"
+        default=USER,
+        choices=USER_ROLES
     )
+    email = models.EmailField(
+        'Почта',
+        unique=True
+    )
+    confirmation_code = models.CharField(
+        'Код авторизации',
+        max_length=15,
+        blank=True,
+        null=True
+    )
+
+    def __str__(self):
+        return self.username
+
+    @property
+    def is_admin(self):
+        return self.role == 'admin'
+
+    @property
+    def is_moder(self):
+        return self.role == 'moder'
+
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'], name='unique_user')
+        ]
 
 
 class Category(models.Model):
     name = models.CharField(
-        max_length=200,
+        max_length=256,
         verbose_name="Категория",
         help_text="Проверьте название категории",
     )
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -29,11 +68,11 @@ class Category(models.Model):
 
 class Genre(models.Model):
     name = models.CharField(
-        max_length=200,
+        max_length=256,
         verbose_name="Жанр",
         help_text="Проверьте название жанра",
     )
-    slug = models.SlugField(unique=True)
+    slug = models.SlugField(max_length=50, unique=True)
 
     def __str__(self):
         return self.name
@@ -51,18 +90,9 @@ class Title(models.Model):
     description = models.TextField(verbose_name="Описание произведения")
     genre = models.ManyToManyField(
         Genre,
-        through='genre_title',
-<<<<<<< HEAD
-
+        through='GenreTitle',
         related_name="titles",
         blank=True,
-
-=======
-        # on_delete=models.SET_NULL,
-        related_name="titles",
-        blank=True,
-        # null=True,
->>>>>>> master
         verbose_name="Жанр произведения",
     )
     category = models.ForeignKey(
@@ -81,7 +111,7 @@ class Title(models.Model):
         return self.name
 
 
-class genre_title(models.Model):
+class GenreTitle(models.Model):
     genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
     title = models.ForeignKey(Title, on_delete=models.CASCADE)
 
@@ -90,7 +120,7 @@ class genre_title(models.Model):
 
 
 class Review(models.Model):
-    title_id = models.ForeignKey(
+    title = models.ForeignKey(
         Title,
         on_delete=models.CASCADE,
         related_name="reviews",
@@ -116,13 +146,13 @@ class Review(models.Model):
         ordering = ["-pub_date"]
         constraints = [
             models.UniqueConstraint(
-                fields=["title_id", "author"], name="unique_review"
+                fields=["title", "author"], name="unique_review"
             )
         ]
 
 
 class Comment(models.Model):
-    review_id = models.ForeignKey(
+    review = models.ForeignKey(
         Review, on_delete=models.CASCADE, related_name="comments"
     )
     text = models.TextField("Текст", help_text="Комментарий")
