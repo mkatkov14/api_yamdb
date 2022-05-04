@@ -1,5 +1,5 @@
-import os
 import datetime
+import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -22,7 +22,6 @@ INSTALLED_APPS = [
     'reviews.apps.ReviewsConfig',
     'api.apps.ApiConfig',
     'django_filters',
-    'api_yamdb',
 ]
 
 MIDDLEWARE = [
@@ -98,7 +97,7 @@ STATICFILES_DIRS = (os.path.join(BASE_DIR, 'static/'),)
 
 REST_FRAMEWORK = {
     'DEFAULT_PERMISSION_CLASSES': [
-        'rest_framework.permissions.IsAuthenticated',
+        'rest_framework.permissions.AllowAny',
     ],
     'DEFAULT_AUTHENTICATION_CLASSES': [
         'rest_framework_simplejwt.authentication.JWTAuthentication',

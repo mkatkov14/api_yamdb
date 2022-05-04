@@ -1,15 +1,18 @@
-from django.core.management.base import BaseCommand, CommandError
-from django.shortcuts import get_object_or_404
-from reviews.models import Category, Genre, Title, Review, GenreTitle, User, Comment
+import csv
+import os
+
 from django.conf import settings
-import os, csv
+from django.core.management.base import BaseCommand
+from django.shortcuts import get_object_or_404
+from reviews.models import (Category, Comment, Genre, GenreTitle, Review,
+                            Title, User)
 
 
 def get_reader(file_name: str):
-        csv_path = os.path.join(settings.BASE_DIR, 'static/data/', file_name)
-        csv_file = open(csv_path, 'r', encoding='utf-8')
-        reader = csv.reader(csv_file, delimiter=',')
-        return reader
+    csv_path = os.path.join(settings.BASE_DIR, 'static/data/', file_name)
+    csv_file = open(csv_path, 'r', encoding='utf-8')
+    reader = csv.reader(csv_file, delimiter=',')
+    return reader
 
 
 class Command(BaseCommand):
@@ -24,7 +27,7 @@ class Command(BaseCommand):
                 slug=row[2]
             )
         print('category - OK')
-        
+
         csv_reader = get_reader('genre.csv')
         next(csv_reader, None)
         for row in csv_reader:
@@ -85,7 +88,7 @@ class Command(BaseCommand):
                 author=obj_user,
                 score=row[4],
                 pub_date=row[5]
-        )
+            )
         print('review - OK')
 
         csv_reader = get_reader('comments.csv')
