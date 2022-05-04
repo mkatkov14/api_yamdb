@@ -10,7 +10,7 @@ class UserSerializers(serializers.ModelSerializer):
         model = User
         fields = '__all__'
 
-        
+
 class CategorySerializer(serializers.ModelSerializer):
 
     class Meta:

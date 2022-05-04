@@ -17,11 +17,10 @@ class User(AbstractUser):
         null=True
     )
     role = models.CharField(
-        "Роль пользователя",
+        'Роль пользователя',
         max_length=50,
-        choices=USER_ROLES,
         default='USER',
-
+        choices=USER_ROLES
     )
 
     def __str__(self):
