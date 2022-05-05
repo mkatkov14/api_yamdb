@@ -20,7 +20,7 @@ python -m venv venv
 ```
 source venv/Script/activate
 ```
-*
+* Обновить pip
 ```
 python -m pip install --upgrade pip
 ```
@@ -40,7 +40,7 @@ python manage.py migrate
 python manage.py importcsv
 ```
 
-*Запустить проект:
+* Запустить проект:
 ```
 python manage.py runserver
 ```
