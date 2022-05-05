@@ -49,21 +49,33 @@ class ObtainTokenSerializer(serializers.ModelSerializer):
 
 
 class CategorySerializer(serializers.ModelSerializer):
-
+    lookup_field = 'slug'
     class Meta:
         model = Category
         fields = ('name', 'slug',)
 
 
 class GenreSerializer(serializers.ModelSerializer):
+    lookup_field = 'slug'
     class Meta:
         model = Genre
         fields = ('name', 'slug',)
 
+class CategoryTitle(serializers.SlugRelatedField):
+    def to_representation(self, value):
+        serializer = CategorySerializer(value)
+        return serializer.data
+
+
+class GenreTitle(serializers.SlugRelatedField):
+    def to_representation(self, value):
+        serializer = GenreSerializer(value)
+        return serializer.data
+
 
 class TitleSerializer(serializers.ModelSerializer):
-    # category = CategorySerializer(slug_field='slug', queryset=Category.objects.all(), required=False)
-    # genre = GenreSerializer(slug_field='slug', queryset=Genre.objects.all(), many=True)
+    category = CategoryTitle(slug_field='slug', queryset=Category.objects.all(), required=False)
+    genre = GenreTitle(slug_field='slug', queryset=Genre.objects.all(), many=True)
 
     class Meta:
         model = Title
