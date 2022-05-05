@@ -71,6 +71,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
         reviews = title.reviews.all()
         return reviews
 
+    def perform_create(self, serializer):
+        title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
+        serializer.save(author=self.request.user, title=title)
+
 
 class CommentViewSet(viewsets.ModelViewSet):
     serializer_class = CommentSerializer
@@ -92,6 +96,9 @@ class CategoryViewSet(GetPostDeleteViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     # filterset_fields = ('name')
     search_fields = ('name',)
+
+    # @action(methods=['get'], detail=False)
+    # def category(self, request):
 
 
 class GenreViewSet(GetPostDeleteViewSet):
