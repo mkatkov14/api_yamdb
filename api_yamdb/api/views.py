@@ -1,4 +1,3 @@
-from api.utils import confirmation_generator
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
 from rest_framework import filters, mixins, status, viewsets
@@ -7,10 +6,18 @@ from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
 
-from .serializers import (CategorySerializer, CommentSerializer,
-                          GenreSerializer, ObtainTokenSerializer,
-                          RegistrationSerializer, ReviewSerializer,
-                          TitleSerializer, UserSerializer)
+from api.utils import confirmation_generator
+
+from .serializers import (
+    CategorySerializer,
+    CommentSerializer,
+    GenreSerializer,
+    ObtainTokenSerializer,
+    RegistrationSerializer,
+    ReviewSerializer,
+    TitleSerializer,
+    UserSerializer,
+)
 
 
 class GetPostDeleteViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
@@ -96,6 +103,7 @@ class CategoryViewSet(GetPostDeleteViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     # filterset_fields = ('name')
     search_fields = ('name',)
+    lookup_field = 'slug'
 
     # @action(methods=['get'], detail=False)
     # def category(self, request):
@@ -108,18 +116,28 @@ class GenreViewSet(GetPostDeleteViewSet):
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
     # filterset_fields = ('name')
     search_fields = ('name',)
+    lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
     # permission_classes =
-    queryset = Title.objects.all()
+    # queryset = Title.objects.all()
     serializer_class = TitleSerializer
     # filter_backends = (DjangoFilterBackend)
-    # filterset_fields=('genre__slug', 'category__slug', 'name', 'year', )
 
-    # def get_queryset(self):
-    #    queryset = Title.objects.all()
-    #    slug = self.request.query_params.get('slug')
-    #    if slug is not None:
-    #        queryset = queryset.filter(slug=slug)
-    #    return queryset
+    def get_queryset(self):
+        queryset = Title.objects.all()
+        genre_slug = self.request.query_params.get('genre')
+        if genre_slug is not None:
+            queryset = queryset.filter(genre__slug=genre_slug)
+        category_slug = self.request.query_params.get('category')
+        if category_slug is not None:
+            queryset = queryset.filter(category__slug=category_slug)
+        name = self.request.query_params.get('name')
+        if name is not None:
+            queryset = queryset.filter(name__contains=name)
+        year = self.request.query_params.get('year')
+        if year is not None:
+            queryset = queryset.filter(year=year)
+
+        return queryset
