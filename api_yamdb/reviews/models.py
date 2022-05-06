@@ -25,6 +25,7 @@ class User(AbstractUser):
         default=USER,
         choices=USER_ROLES
     )
+    # Пришлось переопределить, чтобы поле стало уникальным.
     email = models.EmailField(
         'Почта',
         unique=True
