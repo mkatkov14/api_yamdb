@@ -41,7 +41,8 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        return self.role == 'admin'
+        # return self.role == 'admin'
+        return self.is_superuser or self.role == "admin" or self.is_staff
 
     @property
     def is_moder(self):
@@ -135,7 +136,6 @@ class Review(models.Model):
     score = models.SmallIntegerField(
         verbose_name="Оценка",
         validators=[MinValueValidator(1), MaxValueValidator(10)],
-        # default=0
     )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 

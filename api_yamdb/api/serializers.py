@@ -50,6 +50,7 @@ class ObtainTokenSerializer(serializers.ModelSerializer):
 
 class CategorySerializer(serializers.ModelSerializer):
     lookup_field = 'slug'
+
     class Meta:
         model = Category
         fields = ('name', 'slug',)
@@ -57,9 +58,11 @@ class CategorySerializer(serializers.ModelSerializer):
 
 class GenreSerializer(serializers.ModelSerializer):
     lookup_field = 'slug'
+
     class Meta:
         model = Genre
         fields = ('name', 'slug',)
+
 
 class CategoryTitle(serializers.SlugRelatedField):
     def to_representation(self, value):
@@ -84,16 +87,20 @@ class TitleSerializer(serializers.ModelSerializer):
 
 class ReviewSerializer(serializers.ModelSerializer):
     author = SlugRelatedField(
-        read_only=True, slug_field='username'
+        slug_field='username', read_only=True,
     )
+    #title = SlugRelatedField(
+    #    slug_field='title_id', read_only=True
+    #)
 
     class Meta:
         fields = '__all__'
         model = Review
+        #read_only_fields = ('title',)
         validators = [
             UniqueTogetherValidator(
                 queryset=Review.objects.all(),
-                fields=['title_id', 'author']
+                fields=['title', 'author']
             )
         ]
 

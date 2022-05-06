@@ -1,11 +1,12 @@
 from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-from rest_framework import filters, mixins, status, viewsets
+# from rest_framework import permissions
+from rest_framework import filters, mixins, status, viewsets, permissions
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
 from reviews.models import Category, Genre, Review, Title, User
-
+from .permissions import IsAdminOrReadOnly
 from api.utils import confirmation_generator
 
 from .serializers import (
@@ -72,6 +73,7 @@ class UserViewSet(viewsets.ModelViewSet):
 
 class ReviewViewSet(viewsets.ModelViewSet):
     serializer_class = ReviewSerializer
+    permission_classes = []
 
     def get_queryset(self):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
@@ -80,7 +82,8 @@ class ReviewViewSet(viewsets.ModelViewSet):
 
     def perform_create(self, serializer):
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        serializer.save(author=self.request.user, title=title)
+        if serializer.is_valid:
+            serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -99,31 +102,24 @@ class CommentViewSet(viewsets.ModelViewSet):
 class CategoryViewSet(GetPostDeleteViewSet):
     queryset = Category.objects.all()
     serializer_class = CategorySerializer
-    # permission_classes =
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    # filterset_fields = ('name')
     search_fields = ('name',)
     lookup_field = 'slug'
-
-    # @action(methods=['get'], detail=False)
-    # def category(self, request):
 
 
 class GenreViewSet(GetPostDeleteViewSet):
     queryset = Genre.objects.all()
     serializer_class = GenreSerializer
-    # permission_classes =
+    permission_classes = [IsAdminOrReadOnly]
     filter_backends = (DjangoFilterBackend, filters.SearchFilter)
-    # filterset_fields = ('name')
     search_fields = ('name',)
     lookup_field = 'slug'
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    # permission_classes =
-    # queryset = Title.objects.all()
+    permission_classes = [IsAdminOrReadOnly]
     serializer_class = TitleSerializer
-    # filter_backends = (DjangoFilterBackend)
 
     def get_queryset(self):
         queryset = Title.objects.all()
@@ -139,5 +135,4 @@ class TitleViewSet(viewsets.ModelViewSet):
         year = self.request.query_params.get('year')
         if year is not None:
             queryset = queryset.filter(year=year)
-
         return queryset
