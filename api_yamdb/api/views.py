@@ -1,18 +1,20 @@
 from django.shortcuts import get_object_or_404
-from rest_framework import viewsets, status
+from rest_framework import viewsets, status, permissions
 from rest_framework.views import APIView
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework_simplejwt.tokens import RefreshToken
 
+from api.permissions import AdminPermission
 from api.utils import confirmation_generator
-from reviews.models import Title, Review, User
-from .serializers import (
+from api.serializers import (
     ReviewSerializer,
     CommentSerializer,
     RegistrationSerializer,
     ObtainTokenSerializer,
     UserSerializer
 )
+from reviews.models import Title, Review, User
 
 
 class UserRegistrationView(APIView):
@@ -58,6 +60,28 @@ class AuthTokenView(APIView):
 class UserViewSet(viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
+    permission_classes = (AdminPermission,)
+    lookup_field = "username"
+
+    @action(
+        methods=["GET", "PATCH"],
+        detail=False,
+        permission_classes=[permissions.IsAuthenticated],
+    )
+    # Если захотите разобраться, откуда это взялось,
+    # пример в уроке Вьюсеты.Расширенные возможности.
+    def me(self, request):
+        serializer = UserSerializer(request.user)
+        if request.method == "PATCH":
+            serializer = UserSerializer(
+                request.user,
+                data=request.data,
+                partial=True
+            )
+            if serializer.is_valid():
+                serializer.validated_data['role'] = request.user.role
+                serializer.save()
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
