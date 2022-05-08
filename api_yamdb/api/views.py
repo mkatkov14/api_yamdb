@@ -10,6 +10,7 @@ from reviews.models import Category, Genre, Review, Title, User
 from .permissions import IsAdminOrReadOnly, IsAuthorAdminModerOrReadOnly, IsModer
 from api.utils import confirmation_generator
 
+from .filters import TitleFilter
 from .serializers import (
     CategorySerializer,
     CommentSerializer,
@@ -132,6 +133,7 @@ class TitleViewSet(viewsets.ModelViewSet):
     queryset = Title.objects.all().annotate(Avg('reviews__score')).order_by('name')
     permission_classes = [IsAdminOrReadOnly]
     serializer_class = TitleSerializer
+    filterset_class = TitleFilter
 
     #def get_queryset(self):
     #    queryset = Title.objects.all()
@@ -159,10 +161,10 @@ class ReviewViewSet(viewsets.ModelViewSet):
         return title.reviews.all()
 
     def perform_create(self, serializer):
-        #title_id = self.kwargs.get('title_id')
+        print('вызван метод perform_create')
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        # if serializer.is_valid:
-        serializer.save(author=self.request.user, title=title)
+        if serializer.is_valid:
+            serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
