@@ -47,7 +47,7 @@ class User(AbstractUser):
 
     @property
     def is_moder(self):
-        return self.role == 'moder'
+        return self.role == 'moderator'
 
     class Meta:
         constraints = [
