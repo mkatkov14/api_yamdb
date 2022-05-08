@@ -36,6 +36,12 @@ class User(AbstractUser):
         null=True
     )
 
+    class Meta:
+        constraints = [
+            models.UniqueConstraint(
+                fields=['username', 'email'], name='unique_user')
+        ]
+
     def __str__(self):
         return self.username
 
@@ -47,12 +53,6 @@ class User(AbstractUser):
     def is_moder(self):
         return self.role == 'moderator'
 
-    class Meta:
-        constraints = [
-            models.UniqueConstraint(
-                fields=['username', 'email'], name='unique_user')
-        ]
-
 
 class Category(models.Model):
     name = models.CharField(
@@ -60,7 +60,7 @@ class Category(models.Model):
         verbose_name="Категория",
         help_text="Проверьте название категории",
     )
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(unique=True)
 
     def __str__(self):
         return self.name
@@ -72,7 +72,7 @@ class Genre(models.Model):
         verbose_name="Жанр",
         help_text="Проверьте название жанра",
     )
-    slug = models.SlugField(max_length=50, unique=True)
+    slug = models.SlugField(unique=True)
 
     def __str__(self):
         return self.name
@@ -90,7 +90,6 @@ class Title(models.Model):
     description = models.TextField(verbose_name="Описание произведения")
     genre = models.ManyToManyField(
         Genre,
-        through='GenreTitle',
         related_name="titles",
         blank=True,
         verbose_name="Жанр произведения",
@@ -109,14 +108,6 @@ class Title(models.Model):
 
     def __str__(self):
         return self.name
-
-
-class GenreTitle(models.Model):
-    genre = models.ForeignKey(Genre, on_delete=models.CASCADE)
-    title = models.ForeignKey(Title, on_delete=models.CASCADE)
-
-    def __str__(self):
-        return f'{self.genre} {self.title}'
 
 
 class Review(models.Model):
@@ -138,9 +129,6 @@ class Review(models.Model):
     )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
-    def __str__(self):
-        return self.text[:15]
-
     class Meta:
         ordering = ["-pub_date"]
         constraints = [
@@ -148,6 +136,9 @@ class Review(models.Model):
                 fields=["author", "title"], name="unique_review"
             )
         ]
+
+    def __str__(self):
+        return self.text[:15]
 
 
 class Comment(models.Model):
@@ -160,8 +151,8 @@ class Comment(models.Model):
     )
     pub_date = models.DateTimeField("Дата публикации", auto_now_add=True)
 
-    def __str__(self):
-        return self.text
-
     class Meta:
         ordering = ["-pub_date"]
+
+    def __str__(self):
+        return self.text

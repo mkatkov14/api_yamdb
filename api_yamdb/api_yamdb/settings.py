@@ -1,5 +1,6 @@
 import datetime
 import os
+import string
 
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
@@ -109,6 +110,10 @@ SIMPLE_JWT = {
     'ACCESS_TOKEN_LIFETIME': datetime.timedelta(days=1),
     'AUTH_HEADER_TYPES': ('Bearer',),
 }
+
+CONF_GEN = string.ascii_letters + string.digits
+MAIL_SUBJECT = 'Код подтверждения регистрации'
+FROM_EMAIL = 'yamdb.host@yandex.ru'
 
 EMAIL_HOST = 'smtp.yandex.ru'
 EMAIL_PORT = 587
