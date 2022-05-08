@@ -25,7 +25,6 @@ class User(AbstractUser):
         default=USER,
         choices=USER_ROLES
     )
-    # Пришлось переопределить, чтобы поле стало уникальным.
     email = models.EmailField(
         'Почта',
         unique=True
@@ -42,7 +41,6 @@ class User(AbstractUser):
 
     @property
     def is_admin(self):
-        # return self.role == 'admin'
         return self.is_superuser or self.role == "admin" or self.is_staff
 
     @property

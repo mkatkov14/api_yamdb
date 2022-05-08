@@ -1,9 +1,8 @@
 from django.shortcuts import get_object_or_404
-from django.db.models import Avg
 from rest_framework import serializers
 from rest_framework.relations import SlugRelatedField
-# from rest_framework.validators import UniqueTogetherValidator
-from reviews.models import Category, Comment, Genre, User, Title, Review
+
+from reviews.models import Category, Comment, Genre, Review, Title, User
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -79,9 +78,20 @@ class GenreTitle(serializers.SlugRelatedField):
 
 
 class TitleSerializer(serializers.ModelSerializer):
-    category = CategoryTitle(slug_field='slug', queryset=Category.objects.all(), required=False)
-    genre = GenreTitle(slug_field='slug', queryset=Genre.objects.all(), many=True)
-    rating = serializers.IntegerField(source='reviews__score__avg', read_only=True)
+    category = CategoryTitle(
+        slug_field='slug',
+        queryset=Category.objects.all(),
+        required=False
+    )
+    genre = GenreTitle(
+        slug_field='slug',
+        queryset=Genre.objects.all(),
+        many=True
+    )
+    rating = serializers.IntegerField(
+        source='reviews__score__avg',
+        read_only=True
+    )
 
     class Meta:
         model = Title
@@ -100,7 +110,8 @@ class ReviewSerializer(serializers.ModelSerializer):
         title_id = self.context['view'].kwargs.get('title_id')
         author = self.context.get('request').user
         title = get_object_or_404(Title, id=title_id)
-        if title.reviews.filter(author=author).exists() and self.context.get('request').method != 'PATCH':
+        if (title.reviews.filter(author=author).exists()
+           and self.context.get('request').method != 'PATCH'):
             raise serializers.ValidationError(
                 'Можно оставлять только один отзыв!'
             )

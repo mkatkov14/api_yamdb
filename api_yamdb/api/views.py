@@ -1,47 +1,31 @@
-from django.shortcuts import get_object_or_404
 from django.db.models import Avg
+from django.shortcuts import get_object_or_404
 from django_filters.rest_framework import DjangoFilterBackend
-# from rest_framework import permissions
-from rest_framework import filters, mixins, status, viewsets, permissions
+from rest_framework import filters, mixins, permissions, status, viewsets
+from rest_framework.decorators import action
 from rest_framework.response import Response
 from rest_framework.views import APIView
 from rest_framework_simplejwt.tokens import RefreshToken
-from reviews.models import Category, Genre, Review, Title, User
-from .permissions import IsAdminOrReadOnly, IsAuthorAdminModerOrReadOnly, IsModer
-from api.utils import confirmation_generator
 
+from reviews.models import Category, Genre, User, Review, Title
+from .utils import confirmation_generator
 from .filters import TitleFilter
-from .serializers import (
-    CategorySerializer,
-    CommentSerializer,
-    GenreSerializer,
-    ObtainTokenSerializer,
-    RegistrationSerializer,
-    ReviewSerializer,
-    TitleSerializer,
-    UserSerializer,
-)
+from .permissions import (AdminPermission,
+                          IsAdminOrReadOnly,
+                          IsAuthorAdminModerOrReadOnly)
+from .serializers import (ObtainTokenSerializer,
+                          RegistrationSerializer,
+                          UserSerializer,
+                          CategorySerializer,
+                          GenreSerializer,
+                          TitleSerializer,
+                          ReviewSerializer,
+                          CommentSerializer)
 
 
 class GetPostDeleteViewSet(mixins.CreateModelMixin, mixins.DestroyModelMixin,
                            mixins.ListModelMixin, viewsets.GenericViewSet):
     pass
-from rest_framework import viewsets, status, permissions
-from rest_framework.views import APIView
-from rest_framework.decorators import action
-from rest_framework.response import Response
-from rest_framework_simplejwt.tokens import RefreshToken
-
-from api.permissions import AdminPermission
-from api.utils import confirmation_generator
-from api.serializers import (
-    ReviewSerializer,
-    CommentSerializer,
-    RegistrationSerializer,
-    ObtainTokenSerializer,
-    UserSerializer
-)
-from reviews.models import Title, Review, User
 
 
 class UserRegistrationView(APIView):
@@ -95,8 +79,6 @@ class UserViewSet(viewsets.ModelViewSet):
         detail=False,
         permission_classes=[permissions.IsAuthenticated],
     )
-    # Если захотите разобраться, откуда это взялось,
-    # пример в уроке Вьюсеты.Расширенные возможности.
     def me(self, request):
         serializer = UserSerializer(request.user)
         if request.method == "PATCH":
@@ -130,26 +112,12 @@ class GenreViewSet(GetPostDeleteViewSet):
 
 
 class TitleViewSet(viewsets.ModelViewSet):
-    queryset = Title.objects.all().annotate(Avg('reviews__score')).order_by('name')
+    queryset = Title.objects.all().annotate(
+        Avg('reviews__score')).order_by('name')
+
     permission_classes = [IsAdminOrReadOnly]
     serializer_class = TitleSerializer
     filterset_class = TitleFilter
-
-    #def get_queryset(self):
-    #    queryset = Title.objects.all()
-    #    genre_slug = self.request.query_params.get('genre')
-    #    if genre_slug is not None:
-    #        queryset = queryset.filter(genre__slug=genre_slug)
-    #    category_slug = self.request.query_params.get('category')
-    #    if category_slug is not None:
-    #        queryset = queryset.filter(category__slug=category_slug)
-    #    name = self.request.query_params.get('name')
-    #    if name is not None:
-    #        queryset = queryset.filter(name__contains=name)
-    #    year = self.request.query_params.get('year')
-    #    if year is not None:
-    #        queryset = queryset.filter(year=year)
-    #    return queryset
 
 
 class ReviewViewSet(viewsets.ModelViewSet):
@@ -163,8 +131,7 @@ class ReviewViewSet(viewsets.ModelViewSet):
     def perform_create(self, serializer):
         print('вызван метод perform_create')
         title = get_object_or_404(Title, id=self.kwargs.get('title_id'))
-        if serializer.is_valid:
-            serializer.save(author=self.request.user, title=title)
+        serializer.save(author=self.request.user, title=title)
 
 
 class CommentViewSet(viewsets.ModelViewSet):
@@ -173,8 +140,7 @@ class CommentViewSet(viewsets.ModelViewSet):
 
     def get_queryset(self):
         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))
-        comments = review.comments.all()
-        return comments
+        return review.comments.all()
 
     def perform_create(self, serializer):
         review = get_object_or_404(Review, id=self.kwargs.get('review_id'))

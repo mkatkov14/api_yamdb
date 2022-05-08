@@ -2,6 +2,7 @@ import random
 
 from django.core.mail import send_mail
 from django.shortcuts import get_object_or_404
+
 from reviews.models import User
 
 CONF_GEN = '1234567890qwertyuiopasdfghjklzxcvbnmQWERTYUIOPASDFGHJKLZXCVBNM'
