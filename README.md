@@ -1,5 +1,12 @@
 # **Api_YaMDb**
-## Проект YaMDb собирает отзывы пользователей на произведения
+
+проект был выполнен в соавсторстве с 
+
+https://github.com/V-pix
+
+https://github.com/Povidailoff
+
+---
 
 ### _Технологии_
 - Python 3.7
